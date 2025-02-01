@@ -70,6 +70,7 @@ let currentEmail = ""
 
     }}
 
+  
 const newEmailLoaded = (emailId) => {
     // Runs every time a new email is loaded. Returns the email body, and all urls present 
 
@@ -84,8 +85,51 @@ const newEmailLoaded = (emailId) => {
     const links = emailBody.querySelectorAll("a");
     
     // Collect all the links' href attributes
-    const linkUrls = [...new Set(Array.from(links).map(link => link.href))];
+    // const linkUrls = [...new Set(Array.from(links).map(link => link.href))];
 
+    // *******
+
+    for (const link of links) {
+      try {
+        const url = link.href;
+        if (!url || typeof url !== 'string') {
+          console.warn('Skipping invalid URL:', url);
+          continue;
+        }
+  
+        // Send message to background script to check URL safety
+        console.log("Sending URL to background script for safety check:", url);
+        chrome.runtime.sendMessage(
+          { action: 'checkUrlSafety', url },
+          response => {
+            console.log("Received response from background script:", response);
+            if (response.error) {
+              console.error('Error checking URL safety:', response.error);
+              return;
+            }
+            if (!response.isSafe) {
+              console.log(`URL "${url}" is unsafe.`);
+              link.style.backgroundColor = '#ffebee';
+              link.style.padding = '2px 4px';
+              link.style.borderRadius = '3px';
+              link.style.border = '1px solid #ffcdd2';
+              link.title = 'Warning: This link may be unsafe';
+  
+              const warningIcon = document.createElement('span');
+              warningIcon.innerHTML = ' ⚠️';
+              warningIcon.style.fontSize = '12px';
+              link.appendChild(warningIcon);
+            }
+          }
+        );
+      } catch (error) {
+        console.error(`Error processing link ${link.href}:`, error);
+      }
+    }
+      
+    // ***********  
+
+      
     // Combine text content and links into a string
     const result = {
         text: textContent,
