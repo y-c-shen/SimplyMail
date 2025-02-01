@@ -2,11 +2,17 @@ import ollama
 from pymongo_get_database import get_database
 
 class Email:
+    # Class Variables
+    dbname = get_database('emails_db')
+    collection_name = dbname['emails']
+
     def __init__(self, email, email_id):
         self.email = email
         self.email_id = email_id
-        self.summarize()
-        self.insert_db()
+        
+        if self.check_db():
+            self.summarize()
+            self.insert_db()
 
     def summarize(self):
         """
@@ -29,7 +35,7 @@ class Email:
 
         # Store Class data in a dictionary (for MongoDB)
         self.summary = {
-            "email_id" : self.email_id,
+            "_id" : self.email_id,
             "email" : self.email,
             "model" : response['model'],
             "created_at" : response['created_at'],
@@ -42,10 +48,14 @@ class Email:
         Inserts Email class instance data into MongoDB server database as a new item in the emails 
         collection in the emails_db database.
         """
-        dbname = get_database('emails_db')
-        collection_name = dbname['emails']
-        collection_name.insert_one(self.summary)
+        self.collection_name.insert_one(self.summary)
+
+    def check_db(self):
+        cursor = self.collection_name.find_one({'_id' : self.email_id})
+        if cursor is None:
+            return True
+        return False
 
 # TEST (TO REMOVE LATER)
 emailtext = "Unlock New Possibilities This February! As we step into February, it's the perfect time to focus on exploring job opportunities, preparing for summer internships, or refining your professional skills, McGill’s Career Planning Service (CaPS) is here to support you. This month, we’re bringing you exciting workshops, networking events, career fairs, and resources designed to help you confidently navigate your career path. Stay engaged, stay prepared, and maximize the opportunities ahead—your future starts now!"
-test1 = Email(emailtext, '11111')
+test1 = Email(emailtext, '11tr55trt6u46111')
