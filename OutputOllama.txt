@@ -1,0 +1,13 @@
+<think>
+Okay, so I need to summarize the given email into three sentences only. Let me read through the email again carefully.
+
+The subject line is "Hello Hellooo ConUHacks IX Participants!", which seems friendly and clear. The first sentence starts with "The wait is almost over!" So that's a strong statement about time passing quickly, probably indicating that they've finished the process for participants.
+
+Next, before arriving, there are instructions on check-in procedure. They mention having an ID card ready, opening the QR code from the application, and it being scanned during check-in. That should be another key point to include in the summary.
+
+Then, there's a registration deadline with important details about no exceptions or late penalties. That should definitely go into the summary as it's crucial for participants not to miss out on the hackathon experience.
+
+I don't need to mention anything else like the join Discord link or survival kit since those are additional details beyond just summarizing in three sentences. So I can focus on highlighting the main points: the almost-over situation, check-in instructions, and the important deadline.
+</think>
+
+The wait is almost over! Before arriving, participants must check in with ID cards, open their QR codes from applications, and be scanned at the registration window. The deadline for check-in has passed—no exceptions allowed—and it's tight—from 7:00 AM to 9:30 AM sharp—so late arrivals won’t be permitted.
