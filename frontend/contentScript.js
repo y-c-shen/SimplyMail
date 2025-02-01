@@ -2,50 +2,77 @@
 
 let currentEmail = ""
 
-  const fetchBookmarks = () => {
-    return new Promise((resolve) => {
-      chrome.storage.sync.get([currentVideo], (obj) => {
-        resolve(obj[currentVideo] ? JSON.parse(obj[currentVideo]) : []);
-      });
-    });
-  };
+  const createSummaryButton = (emailBody, emailId) => {
+    if (emailBody && !document.getElementById("summarize-btn")) {
+        const summarizeButton = document.createElement("button");
+        summarizeButton.innerText = "Summarize";
+        summarizeButton.id = "summarize-btn-chrome-ext";
+        summarizeButton.style.cssText = `
+                    font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+                    width: 8rem;
+                    margin-top: 20px; 
+                    padding: 16px 24px; 
+                    background-color: rgb(44, 118, 198); 
+                    color: white; 
+                    border: none; 
+                    border-radius: 8px; 
+                    font-size: 14px;
+                    cursor: pointer;
+                    width: 100%; 
+                    text-align: center;
+                `
 
-  const addNewBookmarkEventHandler = async () => {
-    const currentTime = youtubePlayer.currentTime;
-    const newBookmark = {
-      time: currentTime,
-      desc: "Bookmark at " + getTime(currentTime),
-    };
-
-    currentVideoBookmarks = await fetchBookmarks();
-
-    chrome.storage.sync.set({
-      [currentVideo]: JSON.stringify([...currentVideoBookmarks, newBookmark].sort((a, b) => a.time - b.time))
-    });
-  };
-
-  const newVideoLoaded = async () => {
-    // const bookmarkBtnExists = document.getElementsByClassName("bookmark-btn")[0];
-
-    // currentVideoBookmarks = await fetchBookmarks();
-
-    if (!bookmarkBtnExists) {
-      const bookmarkBtn = document.createElement("img");
-
-      bookmarkBtn.src = chrome.runtime.getURL("assets/bookmark.png");
-      bookmarkBtn.className = "ytp-button " + "bookmark-btn";
-      bookmarkBtn.title = "Click to bookmark current timestamp";
-
-      youtubeLeftControls = document.getElementsByClassName("ytp-left-controls")[0];
-      youtubePlayer = document.getElementsByClassName('video-stream')[0];
-
-      youtubeLeftControls.appendChild(bookmarkBtn);
-      bookmarkBtn.addEventListener("click", addNewBookmarkEventHandler);
-    }
-  };
+        // Append the button to the email body
+        emailBody.appendChild(summarizeButton);
 
 
-  const newEmailLoaded = () => {
+        // Add an event listener to send email text to the Flask server
+         // Add an event listener to send email text to the Flask server
+        summarizeButton.addEventListener("click", async () => {
+            console.log("Summarize button clicked!");
+
+            // Extract the email text
+            const emailText = emailBody.innerText.trim();
+
+            // Send a POST request to the Flask server
+            try {
+                const response = await fetch("http://192.168.93.56:5001/summarize", {  
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ email_text: emailText, email_id: emailId })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log("Summary:", data.summary);  // Log the summary
+
+                // Display the summary on the page
+                const summaryDiv = document.createElement("div");
+                summaryDiv.innerText = "Summary: " + data.summary;
+                summaryDiv.style.cssText = `
+                    margin-top: 10px; 
+                    padding: 10px; 
+                    background-color: #f3f3f3; 
+                    border-radius: 5px;
+                    font-size: 14px;
+                `;
+                emailBody.appendChild(summaryDiv);
+
+            } catch (error) {
+                console.error("Error:", error);
+            }
+        });
+
+    }}
+
+const newEmailLoaded = (emailId) => {
+    // Runs every time a new email is loaded. Returns the email body, and all urls present 
+
     // Find the div containing the email body
     const emailBody = document.querySelector(".ii.gt .a3s.aiL");
 
@@ -67,61 +94,24 @@ let currentEmail = ""
 
     console.log("Text Content:", result.text);
     console.log("Links:", result.links);
+
+    createSummaryButton(emailBody, emailId)
     
-
-    console.log("creating button")
-    // Create the "Summarize" button
-    const summarizeButton = document.createElement("button");
-    summarizeButton.innerText = "Summarize";
-    summarizeButton.id = "summarize-btn-chrome-ext";
-    summarizeButton.style.cssText = `
-                margin-top: 20px; 
-                padding: 16px 24px; 
-                background-color: rgb(198, 44, 44); 
-                color: white; 
-                border: none; 
-                border-radius: 8px; 
-                font-size: 16px;
-                cursor: pointer;
-                width: 100%; 
-                text-align: center;
-            `
-
-    // Append the button to the email body
-    emailBody.appendChild(summarizeButton);
-
-        // Log success message
-    console.log("Summarize button successfully added!");
-        // Add an event listener to send email text to the Flask server
-        // summarizeButton.addEventListener("click", () => {
-        //     fetch("http://127.0.0.1:5001/summarize", {  
-        //         method: "POST",
-        //         headers: {
-        //             "Content-Type": "application/json"
-        //         },
-        //         body: JSON.stringify({ email_text: textContent })
-        //     })
-        //     .then(response => response.json())
-        //     .then(data => {
-        //         alert("Summary: " + data.summary);  // Display the summary in an alert (or another UI element)
-        //     })
-        //     .catch(error => console.error("Error:", error));
-        // });
-
-        // Append the button to the email body
     
 
     return result
-}
+    }
 
   }
+
+
 
   chrome.runtime.onMessage.addListener((obj, sender, response) => {
     const { type, emailId } = obj
 
     if (type === "NEW") {
       currentEmail = emailId
-      result = newEmailLoaded()
+      result = newEmailLoaded(emailId)
       console.log(emailId)
     }
   });
