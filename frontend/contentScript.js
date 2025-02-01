@@ -3,7 +3,9 @@
 let currentEmail = ""
 
   const createSummaryButton = (emailBody, emailId) => {
+    console.log("createSummaryButton ran")
     if (emailBody && !document.getElementById("summarize-btn")) {
+        console.log("creating button")
         const summarizeButton = document.createElement("button");
         summarizeButton.innerText = "Summarize";
         summarizeButton.id = "summarize-btn-chrome-ext";
@@ -131,13 +133,10 @@ const newEmailLoaded = (emailId) => {
 
       
     // Combine text content and links into a string
-    const result = {
-        text: textContent,
-        links: linkUrls
-    };
 
-    console.log("Text Content:", result.text);
-    console.log("Links:", result.links);
+
+    console.log("Text Content:", textContent);
+
 
     createSummaryButton(emailBody, emailId)
     
