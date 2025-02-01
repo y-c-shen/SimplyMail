@@ -1,0 +1,26 @@
+{
+  "name": "Gmail Summarizer",
+  "version": "0.1.0",
+  "description": "Summarizing Gmail",
+  "permissions": ["storage", "tabs"],
+  "host_permissions": ["https://mail.google.com/mail/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://mail.google.com/mail/*"],
+      "js": ["contentScript.js"]
+    }
+  ],
+  "action": {
+    "default_icon": {
+      "16": "assets/ext-icon.png",
+      "24": "assets/ext-icon.png",
+      "32": "assets/ext-icon.png"
+    },
+    "default_title": "Gmail Summarizer",
+    "default_popup": "popup.html"
+  },
+  "manifest_version": 3
+}
