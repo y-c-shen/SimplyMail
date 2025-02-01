@@ -1,2 +1,2 @@
 # Ignore Python Venv
-/venv
+venv/
