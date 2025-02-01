@@ -1,2 +1,5 @@
-# Ignore Python Venv
+# Python Venv
 venv/
+
+# Env File
+.env

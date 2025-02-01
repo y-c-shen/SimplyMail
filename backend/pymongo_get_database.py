@@ -1,11 +1,17 @@
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 
+# importing os module for environment variables
+import os
+# importing necessary functions from dotenv library
+from dotenv import load_dotenv
+
 def get_database(dbname):
-    url = "MONGO LINK"
+    # loading variables from .env file
+    load_dotenv() 
 
     # Create a new client and connect to the server
-    client = MongoClient(url, server_api=ServerApi('1'))
+    client = MongoClient(os.getenv('MONGO_LINK'), server_api=ServerApi('1'))
  
    # Create the database for our example (we will use the same database throughout the tutorial
     return client[dbname]
