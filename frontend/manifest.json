@@ -1,16 +1,26 @@
 {
-  "name": "Gmail Summarizer",
+  "name": "frontend",
   "version": "0.1.0",
-  "description": "Summarizing Gmail",
-  "permissions": ["storage", "tabs"],
-  "host_permissions": ["https://mail.google.com/mail/*"],
+  "description": "Summarizes Gmail content and checks links for safety",
+  "permissions": [
+    "storage", 
+    "tabs"
+  ],
+  "host_permissions": [
+    "*://mail.google.com/*",
+    "https://safebrowsing.googleapis.com/*",
+    "https://checkurl.phishtank.com/*"
+  ],
   "background": {
     "service_worker": "background.js"
   },
   "content_scripts": [
     {
       "matches": ["https://mail.google.com/mail/*"],
-      "js": ["contentScript.js"]
+      "js": [
+        "LinkChecker.js",
+        "contentScript.js"
+      ]
     }
   ],
   "action": {
@@ -19,7 +29,7 @@
       "24": "assets/ext-icon.png",
       "32": "assets/ext-icon.png"
     },
-    "default_title": "Gmail Summarizer",
+    "default_title": "Gmail Summarizer & Link Checker",
     "default_popup": "popup.html"
   },
   "manifest_version": 3
