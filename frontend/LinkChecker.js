@@ -1,6 +1,3 @@
-import fetch from "node-fetch";
-
-const GOOGLE_SAFE_BROWSING_API_KEY = 'Your_API_key';
 
 async function getRedirectChain(url, maxRedirects = 10) {
     const redirectChain = [];
@@ -11,7 +8,8 @@ async function getRedirectChain(url, maxRedirects = 10) {
         for (let i = 0; i < maxRedirects; i++) {
             const response = await fetch(currentUrl, {
                 method: 'HEAD',
-                redirect: 'manual'
+                mode: 'no-cors',
+                redirect: 'follow'
             });
 
             redirectChain.push(currentUrl);
@@ -56,6 +54,7 @@ async function checkGoogleSafeBrowsing(url) {
     try {
         const response = await fetch(endpoint, {
             method: 'POST',
+            mode: 'no-cors',
             headers: {
                 'Content-Type': 'application/json'
             },
@@ -134,15 +133,12 @@ async function isSafeUrl(url) {
     }
 
     if (!allSafe) {
-        return [false, "🚨 Warning! Security issues detected in the redirect chain."];
+        return false;
     }
-    return [true, "✅ All URLs in the redirect chain appear to be safe."];
+    return true;
 }
 
-// Example usage
-async function checkUrl(url) {
-    const [safe, message] = await isSafeUrl(url);
-    console.log(`\nFinal verdict: ${message}`);
+console.log("✅ LinkChecker loaded");
+if (typeof window !== 'undefined') {
+    window.LinkChecker = { isSafeUrl };
 }
-checkUrl("https://tinyurl.com/yv82aeuj/op/16842_md/3/626/39/5/284787")
-    .catch(error => console.error("Error:", error));

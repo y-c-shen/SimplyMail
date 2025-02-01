@@ -3,14 +3,16 @@
   "version": "0.1.0",
   "description": "Summarizing Gmail",
   "permissions": ["storage", "tabs"],
-  "host_permissions": ["https://mail.google.com/mail/*"],
+  "host_permissions": ["https://mail.google.com/mail/*",
+                       "https://safebrowsing.googleapis.com/*",
+                       "https://checkurl.phishtank.com/*"],
   "background": {
     "service_worker": "background.js"
   },
   "content_scripts": [
     {
       "matches": ["https://mail.google.com/mail/*"],
-      "js": ["contentScript.js"]
+      "js": ["contentScript.js", "LinkChecker.js"]
     }
   ],
   "action": {
