@@ -104,7 +104,7 @@ const newEmailLoaded = (emailId) => {
         chrome.runtime.sendMessage(
           { action: 'checkUrlSafety', url },
           response => {
-            console.log("Received response from background script:", response);
+            // console.log("Received response from background script:", response);
             if (response.error) {
               console.error('Error checking URL safety:', response.error);
               return;
@@ -140,9 +140,6 @@ const newEmailLoaded = (emailId) => {
 
     createSummaryButton(emailBody, emailId)
     
-    
-
-    return result
     }
 
   }
