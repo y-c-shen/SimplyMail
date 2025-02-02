@@ -10,7 +10,7 @@ class Email:
         self.email = email
         self.email_id = email_id
         
-        if self.check_db():
+        if True:
             self.summarize()
             self.insert_db()
 
@@ -21,7 +21,7 @@ class Email:
         """
         # LLM Parameters
         desiredModel = 'deepseek-r1:1.5b'
-        questionToAsk = 'Summarize the following email in a few concise sentences: "' + self.email + '"'
+        questionToAsk = 'Summarize the following email in a few concise sentences: "' + self.email + '" Start by identifying the email sender.'
 
         # Generate LLM response
         response = ollama.generate(
@@ -51,11 +51,11 @@ class Email:
         self.collection_name.insert_one(self.summary)
 
     def check_db(self):
+        """
+        Check if email has already been summarized previously (by checking email id).
+        """
+        # cursor is a NoneType object if no such query found
         cursor = self.collection_name.find_one({'_id' : self.email_id})
         if cursor is None:
             return True
         return False
-
-# TEST (TO REMOVE LATER)
-emailtext = "Unlock New Possibilities This February! As we step into February, it's the perfect time to focus on exploring job opportunities, preparing for summer internships, or refining your professional skills, McGill’s Career Planning Service (CaPS) is here to support you. This month, we’re bringing you exciting workshops, networking events, career fairs, and resources designed to help you confidently navigate your career path. Stay engaged, stay prepared, and maximize the opportunities ahead—your future starts now!"
-test1 = Email(emailtext, '11tr55trt6u46111')
