@@ -38,13 +38,16 @@ let currentEmail = ""
 
             // Send a POST request to the Flask server
             try {
-                const response = await fetch("http://192.168.93.56:5001/summarize", {  
+                console.log("fetching")
+                const response = await fetch("https://504a-2605-8d80-542-8873-28a0-501-eca6-6755.ngrok-free.app/summarize", {  
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
                     },
+                    
                     body: JSON.stringify({ email_text: emailText, email_id: emailId })
                 });
+                console.log("fetched")
 
                 if (!response.ok) {
                     throw new Error(`HTTP error! Status: ${response.status}`);
