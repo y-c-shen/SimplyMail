@@ -33,8 +33,7 @@ def summarize():
     if not email_text:
         return jsonify({"error": "No email text provided"}), 400
 
-
-    summary = current_email.summary['response']  # Simulated summary
+    summary = email_text  # Simulated summary
 
     current_email = Email(email_text, email_id)
 
@@ -44,6 +43,3 @@ def summarize():
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5001)
-
-
-
