@@ -39,7 +39,7 @@ let currentEmail = ""
             // Send a POST request to the Flask server
             try {
                 console.log("fetching")
-                const response = await fetch("https://decb-2605-8d80-542-8873-28a0-501-eca6-6755.ngrok-free.app/summarize", {  
+                const response = await fetch("https://f90d-2605-8d80-542-8873-28a0-501-eca6-6755.ngrok-free.app/summarize", {  
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"

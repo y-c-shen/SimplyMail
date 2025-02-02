@@ -23,7 +23,7 @@ class Email:
         """
         # LLM Parameters
         desiredModel = 'deepseek-r1:1.5b'
-        questionToAsk = 'Summarize the following email in a few concise sentences: "' + self.email + '" Start by identifying the email sender.'
+        questionToAsk = 'Summarize the following email in a few concise sentences: "' + self.email + '"'
 
         # Generate LLM response
         response = ollama.generate(
