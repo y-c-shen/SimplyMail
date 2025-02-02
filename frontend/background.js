@@ -1,4 +1,4 @@
-const GOOGLE_SAFE_BROWSING_API_KEY = 'api_key'
+const GOOGLE_SAFE_BROWSING_API_KEY = 'YOUR_API_KEY'
 
 async function getRedirectChain(url, maxRedirects = 10) {
     const redirectChain = [];

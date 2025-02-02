@@ -1,7 +1,7 @@
 {
-  "name": "Gmail Summarizer",
+  "name": "SimplyMail",
   "version": "0.1.0",
-  "description": "Summarizing Gmail",
+  "description": "Summarizing Gmail and Checks for Suspicious Links",
   "permissions": ["storage", "tabs"],
   "host_permissions": ["https://mail.google.com/mail/*",
                        "https://safebrowsing.googleapis.com/*",

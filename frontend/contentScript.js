@@ -165,35 +165,53 @@ const newEmailLoaded = (emailId) => {
           continue;
         }
   
-        // Send message to background script to check URL safety
         console.log("Sending URL to background script for safety check:", url);
-        chrome.runtime.sendMessage(
-          { action: 'checkUrlSafety', url },
-          response => {
-            // console.log("Received response from background script:", response);
-            if (response.error) {
-              console.error('Error checking URL safety:', response.error);
-              return;
-            }
-            if (!response.isSafe) {
-              console.log(`URL "${url}" is unsafe.`);
-              link.style.backgroundColor = '#ffebee';
-              link.style.padding = '2px 4px';
-              link.style.borderRadius = '3px';
-              link.style.border = '1px solid #ffcdd2';
-              link.title = 'Warning: This link may be unsafe';
-  
-              const warningIcon = document.createElement('span');
-              warningIcon.innerHTML = ' ⚠️';
-              warningIcon.style.fontSize = '12px';
-              link.appendChild(warningIcon);
-            }
-          }
-        );
-      } catch (error) {
-        console.error(`Error processing link ${link.href}:`, error);
-      }
+chrome.runtime.sendMessage(
+  { action: 'checkUrlSafety', url },
+  response => {
+    if (response.error) {
+      console.error('Error checking URL safety:', response.error);
+      return;
     }
+    if (!response.isSafe) {
+      console.log(`URL "${url}" is unsafe.`);
+      
+      // Find the nearest parent div or similar container
+      let container = link;
+      while (container.parentElement && 
+             !['div', 'section', 'article', 'aside', 'main'].includes(container.tagName.toLowerCase())) {
+        container = container.parentElement;
+      }
+      
+      // Style the container
+      container.style.position = 'relative';  // For proper overlay positioning
+      container.style.backgroundColor = '#ffebee';
+      container.style.border = '2px solid #ff4444';
+      container.style.borderRadius = '4px';
+      container.style.padding = '8px';
+      
+      // Add a warning banner at the top of the container
+      const warningBanner = document.createElement('div');
+      warningBanner.style.backgroundColor = '#ff4444';
+      warningBanner.style.color = 'white';
+      warningBanner.style.padding = '4px 8px';
+      warningBanner.style.marginBottom = '8px';
+      warningBanner.style.borderRadius = '2px';
+      warningBanner.style.fontSize = '14px';
+      warningBanner.innerHTML = '⚠️ Warning: This content contains unsafe links';
+      
+      // Insert the banner at the top of the container
+      container.insertBefore(warningBanner, container.firstChild);
+      
+      // Add warning title to the link itself
+      link.title = 'Warning: This link may be unsafe';
+    }
+  }
+);
+} catch (error) {
+  console.error(`Error processing link ${link.href}:`, error);
+}
+}
       
     // ***********  
 
