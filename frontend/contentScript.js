@@ -83,7 +83,7 @@ const createSummaryButton = (emailBody, emailId) => {
             // Send a POST request to the Flask server
             try {
                 console.log("fetching")
-                const response = await fetch("https://b263-2605-8d80-544-6966-7818-93f-fae6-a2d8.ngrok-free.app/summarize", {  
+                const response = await fetch("https://b4b9-2605-8d80-544-6966-7818-93f-fae6-a2d8.ngrok-free.app/summarize", {  
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
