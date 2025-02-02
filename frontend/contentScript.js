@@ -139,95 +139,80 @@ const createSummaryButton = (emailBody, emailId) => {
     
 
   
-const newEmailLoaded = (emailId) => {
+  const newEmailLoaded = (emailId) => {
     // Runs every time a new email is loaded. Returns the email body, and all urls present 
 
     // Find the div containing the email body
     const emailBody = document.querySelector(".ii.gt .a3s.aiL");
 
     if (emailBody) {
-    // Get the text content (without HTML tags)
-    const textContent = emailBody.innerText;
+        // Get the text content (without HTML tags)
+        const textContent = emailBody.innerText;
 
-    // Get all the links (anchor tags)
-    const links = emailBody.querySelectorAll("a");
-    
-    // Collect all the links' href attributes
-    // const linkUrls = [...new Set(Array.from(links).map(link => link.href))];
+        // Get all the links (anchor tags)
+        const links = emailBody.querySelectorAll("a");
 
-    // *******
+        for (const link of links) {
+            try {
+                const url = link.href;
+                if (!url || typeof url !== 'string') {
+                    console.warn('Skipping invalid URL:', url);
+                    continue;
+                }
 
-    for (const link of links) {
-      try {
-        const url = link.href;
-        if (!url || typeof url !== 'string') {
-          console.warn('Skipping invalid URL:', url);
-          continue;
+                console.log("Sending URL to background script for safety check:", url);
+                chrome.runtime.sendMessage(
+                    { action: 'checkUrlSafety', url },
+                    response => {
+                        if (response.error) {
+                            console.error('Error checking URL safety:', response.error);
+                            return;
+                        }
+                        if (!response.isSafe) {
+                            console.log(`URL "${url}" is unsafe.`);
+
+                            // Find the nearest parent div or similar container
+                            let container = link;
+                            while (container.parentElement && 
+                                   !['div', 'section', 'article', 'aside', 'main'].includes(container.tagName.toLowerCase())) {
+                                container = container.parentElement;
+                            }
+
+                            // Check if warning banner already exists in this container
+                            if (!container.querySelector('.unsafe-link-warning')) {
+                                // Style the container only if it hasn't been styled before
+                                container.style.position = 'relative';
+                                container.style.backgroundColor = '#ffebee';
+                                container.style.border = '2px solid #ff4444';
+                                container.style.borderRadius = '4px';
+                                container.style.padding = '8px';
+
+                                // Create warning banner
+                                const warningBanner = document.createElement('div');
+                                warningBanner.className = 'unsafe-link-warning'; // Add class for checking duplicates
+                                warningBanner.style.backgroundColor = '#ff4444';
+                                warningBanner.style.color = 'white';
+                                warningBanner.style.padding = '4px 8px';
+                                warningBanner.style.marginBottom = '8px';
+                                warningBanner.style.borderRadius = '2px';
+                                warningBanner.style.fontSize = '14px';
+                                warningBanner.innerHTML = '⚠️ Warning: This content contains unsafe links';
+
+                                // Insert the banner at the top of the container
+                                container.insertBefore(warningBanner, container.firstChild);
+                            }
+
+                            // Add warning title to the link itself
+                            link.title = 'Warning: This link may be unsafe';
+                        }
+                    }
+                );
+            } catch (error) {
+                console.error(`Error processing link ${link.href}:`, error);
+            }
         }
-  
-        console.log("Sending URL to background script for safety check:", url);
-chrome.runtime.sendMessage(
-  { action: 'checkUrlSafety', url },
-  response => {
-    if (response.error) {
-      console.error('Error checking URL safety:', response.error);
-      return;
     }
-    if (!response.isSafe) {
-      console.log(`URL "${url}" is unsafe.`);
-      
-      // Find the nearest parent div or similar container
-      let container = link;
-      while (container.parentElement && 
-             !['div', 'section', 'article', 'aside', 'main'].includes(container.tagName.toLowerCase())) {
-        container = container.parentElement;
-      }
-      
-      // Style the container
-      container.style.position = 'relative';  // For proper overlay positioning
-      container.style.backgroundColor = '#ffebee';
-      container.style.border = '2px solid #ff4444';
-      container.style.borderRadius = '4px';
-      container.style.padding = '8px';
-      
-      // Add a warning banner at the top of the container
-      const warningBanner = document.createElement('div');
-      warningBanner.style.backgroundColor = '#ff4444';
-      warningBanner.style.color = 'white';
-      warningBanner.style.padding = '4px 8px';
-      warningBanner.style.marginBottom = '8px';
-      warningBanner.style.borderRadius = '2px';
-      warningBanner.style.fontSize = '14px';
-      warningBanner.innerHTML = '⚠️ Warning: This content contains unsafe links';
-      
-      // Insert the banner at the top of the container
-      container.insertBefore(warningBanner, container.firstChild);
-      
-      // Add warning title to the link itself
-      link.title = 'Warning: This link may be unsafe';
-    }
-  }
-);
-} catch (error) {
-  console.error(`Error processing link ${link.href}:`, error);
 }
-}
-      
-    // ***********  
-
-      
-    // Combine text content and links into a string
-
-
-    console.log("Text Content:", textContent);
-
-
-    createSummaryButton(emailBody, emailId)
-    
-    }
-
-  }
-
 
 
   chrome.runtime.onMessage.addListener((obj, sender, response) => {
