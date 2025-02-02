@@ -39,7 +39,8 @@ def summarize():
     current_email = Email(email_text, email_id)
     ############
 
-    summary = email_text  # Simulated summary
+
+    summary = current_email.summary['response']  # Simulated summary
 
     response = jsonify({"summary": summary, "email_id": email_id})
     response.headers["Access-Control-Allow-Origin"] = "*"  # Allow all origins
@@ -47,3 +48,6 @@ def summarize():
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5001)
+
+
+

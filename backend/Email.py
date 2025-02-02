@@ -10,9 +10,11 @@ class Email:
         self.email = email
         self.email_id = email_id
         
-        if True:
+        if self.check_db():
             self.summarize()
             self.insert_db()
+        else:
+            self.retrieve_db()
 
     def summarize(self):
         """
@@ -59,3 +61,15 @@ class Email:
         if cursor is None:
             return True
         return False
+    
+    def retrieve_db(self):
+        cursor = self.collection_name.find({'_id' : self.email_id})
+        for one in cursor:
+            print(one)
+            self.summary = {
+                "_id" : self.email_id,
+                "email" : self.email,
+                "model" : one['model'],
+                "created_at" : one['created_at'],
+                "response" : one['response']
+            }
