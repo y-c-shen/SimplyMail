@@ -2,36 +2,80 @@
 
 let currentEmail = ""
 
-  const createSummaryButton = (emailBody, emailId) => {
+const createSummaryButton = (emailBody, emailId) => {
     console.log("createSummaryButton ran")
     if (emailBody && !document.getElementById("summarize-btn")) {
         console.log("creating button")
         const summarizeButton = document.createElement("button");
-        summarizeButton.innerText = "Summarize";
+        summarizeButton.innerHTML = `<span class="button-text">Summarize ✨</span>`;
         summarizeButton.id = "summarize-btn-chrome-ext";
+        
+        // Add spinner styles
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+            
+            .spinner {
+                display: none;
+                width: 16px;
+                height: 16px;
+                border: 2px solid #ffffff;
+                border-top: 2px solid transparent;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+                margin-left: 8px;
+                vertical-align: middle;
+            }
+            
+            .loading {
+                opacity: 0.7;
+            }
+        `;
+        document.head.appendChild(style);
+        
         summarizeButton.style.cssText = `
-                    font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-                    width: 8rem;
-                    margin-top: 20px; 
-                    padding: 16px 24px; 
-                    background-color: rgb(44, 118, 198); 
-                    color: white; 
-                    border: none; 
-                    border-radius: 8px; 
-                    font-size: 14px;
-                    cursor: pointer;
-                    width: 100%; 
-                    text-align: center;
-                `
+            font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            min-width: 120px; 
+            max-width: 200px; 
+            margin-top: 10px;
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: rgb(44, 118, 198); 
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            font-size: 14px;
+            cursor: pointer;
+            width: 100%; 
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.3s ease;
+        `;
+
+        // Create and append spinner
+        const spinner = document.createElement('div');
+        spinner.className = 'spinner';
+        summarizeButton.appendChild(spinner);
 
         // Append the button to the email body
-        emailBody.appendChild(summarizeButton);
-
+        emailBody.prepend(summarizeButton);
 
         // Add an event listener to send email text to the Flask server
-         // Add an event listener to send email text to the Flask server
         summarizeButton.addEventListener("click", async () => {
             console.log("Summarize button clicked!");
+
+            // Show spinner and make button transparent
+            const buttonText = summarizeButton.querySelector('.button-text');
+            const spinner = summarizeButton.querySelector('.spinner');
+            buttonText.textContent = 'Summarizing...';
+            spinner.style.display = 'inline-block';
+            summarizeButton.classList.add('loading');
+            summarizeButton.disabled = true;
 
             // Extract the email text
             const emailText = emailBody.innerText.trim();
@@ -39,12 +83,11 @@ let currentEmail = ""
             // Send a POST request to the Flask server
             try {
                 console.log("fetching")
-                const response = await fetch("https://f90d-2605-8d80-542-8873-28a0-501-eca6-6755.ngrok-free.app/summarize", {  
+                const response = await fetch("https://b263-2605-8d80-544-6966-7818-93f-fae6-a2d8.ngrok-free.app/summarize", {  
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
                     },
-                    
                     body: JSON.stringify({ email_text: emailText, email_id: emailId })
                 });
                 console.log("fetched")
@@ -55,26 +98,45 @@ let currentEmail = ""
 
                 const data = await response.json();
                 console.log(data)
-                console.log("Summary:", data.summary);  // Log the summary
+                console.log("Summary:", data.summary);
 
-                // Display the summary on the page
+                const existingSummaryDiv = document.getElementById("summary-div");
+                if (existingSummaryDiv) {
+                    existingSummaryDiv.remove();
+                }
+                
                 const summaryDiv = document.createElement("div");
-                summaryDiv.innerText = "Summary: " + data.summary;
+                summaryDiv.id = "summary-div";
+                summaryDiv.innerText = "Summary: \n " + data.summary;
                 summaryDiv.style.cssText = `
-                    margin-top: 10px; 
-                    padding: 10px; 
-                    background-color: #f3f3f3; 
-                    border-radius: 5px;
+                    margin-bottom: 10px;
+                    padding: 10px;
+                    background-color: #e8f4fc;
+                    border-left: 4px solid #2c76c6;
+                    border-radius: 8px;
                     font-size: 14px;
+                    font-weight: 500;
+                    color: #333;
+                    max-width: 90%;
+                    line-height: 1.4;
                 `;
-                emailBody.appendChild(summaryDiv);
+                
+                summarizeButton.insertAdjacentElement("afterend", summaryDiv);
 
             } catch (error) {
                 console.error("Error:", error);
+            } finally {
+                // Reset button state
+                buttonText.textContent = 'Summarize ✨';
+                spinner.style.display = 'none';
+                summarizeButton.classList.remove('loading');
+                summarizeButton.disabled = false;
             }
         });
+    }
+  }
 
-    }}
+    
 
   
 const newEmailLoaded = (emailId) => {

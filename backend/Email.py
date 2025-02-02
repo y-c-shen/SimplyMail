@@ -23,7 +23,7 @@ class Email:
         """
         # LLM Parameters
         desiredModel = 'deepseek-r1:1.5b'
-        questionToAsk = 'Summarize the following email in a few concise sentences: "' + self.email + '"'
+        questionToAsk = "Summarize the following email in a few concise bullet points, focusing only on key details. Avoid excessive contact information or promotional details. Format the response with clear bullet points. Here is the email: " + self.email
 
         # Generate LLM response
         response = ollama.generate(
