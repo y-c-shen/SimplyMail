@@ -59,3 +59,5 @@ class Email:
         if cursor is None:
             return True
         return False
+    
+#test1 = Email("Hello Yejia Shen, Welcome to ConUHacks IX! Join our Discord server to get important updates, find or complete your team, and access everything you need for the event. ConUHacks IX Discord Make sure to check the Welcome Guide in the server for all the instructions. We can't wait to see you there! If you have already joined the Discord server please ignore this email. Thank you, The HackConcordia Team", 'asfasfsafaf')
