@@ -45,10 +45,15 @@ async function checkGoogleSafeBrowsing(url) {
             clientVersion: "1.0"
         },
         threatInfo: {
-            threatTypes: ["MALWARE", "SOCIAL_ENGINEERING", "UNWANTED_SOFTWARE"],
-            platformTypes: ["ANY_PLATFORM"],
+            threatTypes: [
+                "MALWARE",
+                "SOCIAL_ENGINEERING",
+                "UNWANTED_SOFTWARE",
+                "POTENTIALLY_HARMFUL_APPLICATION"
+            ],
+            platformTypes: ["WINDOWS"],
             threatEntryTypes: ["URL"],
-            threatEntries: [{ url }]
+            threatEntries: [{ url: url }]
         }
     };
 
@@ -57,19 +62,20 @@ async function checkGoogleSafeBrowsing(url) {
             method: 'POST',
             mode: 'no-cors',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
             },
             body: JSON.stringify(payload)
         });
 
-        const result = await response.json();
-
-        if (result.matches) {
-            return [false, "⚠️ Google Safe Browsing detected threats!"];
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
-        return [true, "✅ URL is safe according to Google Safe Browsing."];
+
+        const result = await response.json();
+        return [!result.matches, result.matches ? "⚠️ Google Safe Browsing detected threats!" : "✅ URL is safe according to Google Safe Browsing."];
     } catch (error) {
-        return [false, `Error checking Google Safe Browsing: ${error.message}`];
+        console.error('Error in checkGoogleSafeBrowsing:', error);
+        return [true, `Unable to check Google Safe Browsing: ${error.message}`];
     }
 }
 
@@ -113,61 +119,62 @@ async function checkRedirectSafety(redirectChain) {
 }
 
 async function isSafeUrl(url) {
-    console.log(`Checking initial URL: ${url}`);
+    try {
+        console.log(`Checking initial URL: ${url}`);
 
-    const redirectChain = await getRedirectChain(url);
-    console.log("\nRedirect chain:");
-    redirectChain.forEach((redirectUrl, i) => {
-        console.log(`${i + 1}. ${redirectUrl}`);
-    });
+        const redirectChain = await getRedirectChain(url);
+        console.log("\nRedirect chain:");
+        redirectChain.forEach((redirectUrl, i) => {
+            console.log(`${i + 1}. ${redirectUrl}`);
+        });
 
-    console.log("\nChecking safety of each URL in the redirect chain:");
-    const safetyResults = await checkRedirectSafety(redirectChain);
+        console.log("\nChecking safety of each URL in the redirect chain:");
+        const safetyResults = await checkRedirectSafety(redirectChain);
 
-    let allSafe = true;
-    for (const result of safetyResults) {
-        console.log(`\nChecking: ${result.url}`);
-        result.messages.forEach(message => console.log(message));
-        if (!result.safe) {
-            allSafe = false;
+        let allSafe = true;
+        for (const result of safetyResults) {
+            console.log(`\nChecking: ${result.url}`);
+            result.messages.forEach(message => console.log(message));
+            if (!result.safe) {
+                allSafe = false;
+            }
         }
-    }
 
-    if (!allSafe) {
+        return allSafe;
+    } catch (error) {
+        console.error('Error in isSafeUrl:', error);
         return false;
     }
-    return true;
 }
 
+// Message listeners
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  console.log("Received message in background:", request);
-
-  if (request.action === 'checkUrlSafety') {
-    console.log("Checking URL:", request.url);
-
-    isSafeUrl(request.url)
-      .then(isSafe => sendResponse({ isSafe }))
-      .catch(error => sendResponse({ error: error.message }));
-    
-    // Return true to keep the message channel open until the response is sent
-    return true;
-  }
+    if (request.action === 'checkUrlSafety') {
+        isSafeUrl(request.url)
+            .then(isSafe => {
+                console.log(`URL safety check result: ${isSafe}`);
+                sendResponse({ isSafe });
+            })
+            .catch(error => {
+                console.error('Error in checkUrlSafety handler:', error);
+                sendResponse({ isSafe: false, error: error.message });
+            });
+        return true; // Keep message channel open for async response
+    }
 });
 
-// gmail example link:
-// https://mail.google.com/mail/u/0/#inbox/FMfcgzQZSsNLwLCNlpsqGXFdNKpHBTdL
-// emailId <- FMfcgzQZSsNLwLCNlpsqGXFdNKpHBTdL
-// sends the message when a new gmail tab is opened
-
-chrome.tabs.onUpdated.addListener((tabId, tab) => {
-  if (tab.url && tab.url.includes("mail.google.com/mail")) {
-    const emailId = tab.url.split("#")[1].split('/')[1];
-
-    chrome.tabs.sendMessage(tabId, {
-      type: "NEW",
-      emailId: emailId,
-    });
-  }
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+    if (changeInfo.url && changeInfo.url.includes("mail.google.com/mail")) {
+        try {
+            const emailId = changeInfo.url.split("#")[1].split('/')[1];
+            chrome.tabs.sendMessage(tabId, {
+                type: "NEW",
+                emailId: emailId,
+            });
+        } catch (error) {
+            console.error('Error in tabs.onUpdated handler:', error);
+        }
+    }
 });
 
-console.log("background.js ran")
+console.log("Background script loaded successfully");
