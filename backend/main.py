@@ -33,9 +33,9 @@ def summarize():
     if not email_text:
         return jsonify({"error": "No email text provided"}), 400
 
-    summary = email_text  # Simulated summary
 
     current_email = Email(email_text, email_id)
+    summary = current_email.summary['response']
 
     response = jsonify({"summary": summary, "email_id": email_id})
     response.headers["Access-Control-Allow-Origin"] = "*"  # Allow all origins
