@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from Email import Email
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
@@ -33,6 +34,8 @@ def summarize():
         return jsonify({"error": "No email text provided"}), 400
 
     summary = email_text  # Simulated summary
+
+    current_email = Email(email_text, email_id)
 
     response = jsonify({"summary": summary, "email_id": email_id})
     response.headers["Access-Control-Allow-Origin"] = "*"  # Allow all origins
