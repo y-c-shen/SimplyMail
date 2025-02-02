@@ -10,9 +10,11 @@ class Email:
         self.email = email
         self.email_id = email_id
         
-        if True:
+        if self.check_db():
             self.summarize()
             self.insert_db()
+        else:
+            self.retrieve_db()
 
     def summarize(self):
         """
@@ -60,4 +62,18 @@ class Email:
             return True
         return False
     
+<<<<<<< HEAD
 #test1 = Email("Hello Yejia Shen, Welcome to ConUHacks IX! Join our Discord server to get important updates, find or complete your team, and access everything you need for the event. ConUHacks IX Discord Make sure to check the Welcome Guide in the server for all the instructions. We can't wait to see you there! If you have already joined the Discord server please ignore this email. Thank you, The HackConcordia Team", 'asfasfsafaf')
+=======
+    def retrieve_db(self):
+        cursor = self.collection_name.find({'_id' : self.email_id})
+        for one in cursor:
+            print(one)
+            self.summary = {
+                "_id" : self.email_id,
+                "email" : self.email,
+                "model" : one['model'],
+                "created_at" : one['created_at'],
+                "response" : one['response']
+            }
+>>>>>>> refs/remotes/origin/main
